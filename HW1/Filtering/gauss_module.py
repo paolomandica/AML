@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from scipy.signal import convolve2d as conv2
+from scipy.ndimage import gaussian_filter1d
 
 
 
@@ -13,7 +14,9 @@ The function should return the Gaussian values Gx computed at the indexes x
 """
 def gauss(sigma):
     
-    #...
+    # create array of integer values x
+    x = np.arange(-3*sigma, 3*sigma+1)
+    Gx = (1/(np.sqrt(2+np.pi)*sigma)) * np.exp(-x**2 / 2*sigma**2)
     
     return Gx, x
 
@@ -53,3 +56,10 @@ def gaussderiv(img, sigma):
     
     return imgDx, imgDy
 
+
+if __name__ == "__main__":
+
+    Gx, x = gauss(5)
+
+    print("Gx: ", Gx)
+    print("x: ", x)
