@@ -52,23 +52,28 @@ The function should return the Gaussian derivative values Dx computed at the ind
 
 def gaussdx(sigma):
 
-    # ...
+    Gx, x = gauss(sigma)
+    Dx = np.gradient(Gx)
 
     return Dx, x
 
 
 def gaussderiv(img, sigma):
 
-    # ...
+    kernel, _ = gaussdx(sigma)
+    # Compute Gaussian on rows
+    imgDx = np.apply_along_axis(convolve, 0, img, kernel, mode="same")
+    # Compute Gaussian on columns
+    imgDy = np.apply_along_axis(convolve, 1, img, kernel, mode="same")
 
     return imgDx, imgDy
 
 
 if __name__ == "__main__":
 
-    Gx, x = gauss(4)
+    Dx, x = gaussdx(4)
 
     print("x: ", x)
     print()
-    print("Gx: ", Gx)
+    print("Gx: ", Dx)
     print()
