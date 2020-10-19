@@ -19,7 +19,7 @@ def rgb2gray(rgb):
 
 ## function gauss (Question 1.a)
 
-sigma = 4.0
+sigma = 4
 [Gx, x] = gauss_module.gauss(sigma)
 
 plt.figure(1)
@@ -30,7 +30,7 @@ plt.show()
 
 ## function gaussianfilter (Question 1.b)
 
-img = rgb2gray(np.array(Image.open('graf.png')))
+img = rgb2gray(np.array(Image.open('HW1\Filtering\graf.png')))
 smooth_img = gauss_module.gaussianfilter(img, sigma)
 
 plt.figure(2)
