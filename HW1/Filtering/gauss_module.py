@@ -52,7 +52,9 @@ The function should return the Gaussian derivative values Dx computed at the ind
 
 def gaussdx(sigma):
 
+    # Compute gaussian filter
     Gx, x = gauss(sigma)
+    # Derive gaussian filter
     Dx = np.gradient(Gx)
 
     return Dx, x
@@ -71,9 +73,9 @@ def gaussderiv(img, sigma):
 
 if __name__ == "__main__":
 
-    Dx, x = gaussdx(4)
+    Gx, x = gauss(4)
 
     print("x: ", x)
     print()
-    print("Gx: ", Dx)
+    print("Gx: ", Gx)
     print()
