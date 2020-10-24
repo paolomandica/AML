@@ -210,11 +210,6 @@ for dist_type in dist_type_list:
         perc = 1.0 * num_correct / len(query_images)
         num_correct_dict[(dist_type, hist_type)] = (num_correct, perc)
 
-print(num_correct_dict)
-
-num_correct_dict = {('intersect', 'grayvalue'): (45, 0.5056179775280899), ('intersect', 'rgb'): (72, 0.8089887640449438), ('intersect', 'rg'): (65, 0.7303370786516854), ('intersect', 'dxdy'): (58, 0.651685393258427), ('chi2', 'grayvalue'): (48, 0.5393258426966292), ('chi2', 'rgb'): (
-    38, 0.42696629213483145), ('chi2', 'rg'): (42, 0.47191011235955055), ('chi2', 'dxdy'): (41, 0.4606741573033708), ('l2', 'grayvalue'): (36, 0.4044943820224719), ('l2', 'rgb'): (34, 0.38202247191011235), ('l2', 'rg'): (39, 0.43820224719101125), ('l2', 'dxdy'): (40, 0.449438202247191)}
-
 num_correct_dict = {k: v for k, v in sorted(num_correct_dict.items(), key=lambda item: item[1], reverse=True)}
 
 print()
