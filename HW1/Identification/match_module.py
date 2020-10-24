@@ -62,7 +62,11 @@ def compute_histograms(image_list, hist_type, hist_isgray, num_bins):
         if hist_isgray:
             image = rgb2gray(image)
 
-        hists = histogram_module.get_hist_by_name(image, num_bins, hist_type)
+        if hist_type == "grayvalue":
+            hists, _ = histogram_module.get_hist_by_name(
+                image, num_bins, hist_type)
+        else:
+            hists = histogram_module.get_hist_by_name(image, num_bins, hist_type)
         image_hist.append(hists)
 
     return image_hist
@@ -81,7 +85,7 @@ def show_neighbors(model_images, query_images, dist_type, hist_type, num_bins):
 
     num_nearest = 5  # show the top-5 neighbors
     
-    best_match, D = find_best_match(model_images, query_images, dist_type, hist_type, num_bins)
+    _, D = find_best_match(model_images, query_images, dist_type, hist_type, num_bins)
 
     D_sorted = np.argsort(D, axis=0)
 
