@@ -32,10 +32,19 @@ def find_best_match(model_images, query_images, dist_type, hist_type, num_bins):
     query_hists = compute_histograms(query_images, hist_type, hist_isgray, num_bins)
     
     D = np.zeros((len(model_images), len(query_images)))
+    best_match = []
     
-    
-    #... (your code here)
+    for i, query_hist in enumerate(query_hists):
+        min_d = np.inf
+        min_d_index = -1
 
+        for j, model_hist in enumerate(model_hists):
+            d = dist_module.get_dist_by_name(query_hist, model_hist, dist_type)
+            D[j][i] = d
+            if d < min_d:
+                min_d = d
+                min_d_index = j
+        best_match.append(min_d_index)
 
     return best_match, D
 
@@ -47,7 +56,14 @@ def compute_histograms(image_list, hist_type, hist_isgray, num_bins):
 
     # Compute hisgoram for each image and add it at the bottom of image_hist
 
-    #... (your code here)
+    for image_path in image_list:
+
+        image = np.array(Image.open(image_path)).astype('double')
+        if hist_isgray:
+            image = rgb2gray(image)
+
+        hists = histogram_module.get_hist_by_name(image, num_bins, hist_type)
+        image_hist.append(hists)
 
     return image_hist
 
@@ -65,5 +81,25 @@ def show_neighbors(model_images, query_images, dist_type, hist_type, num_bins):
 
     num_nearest = 5  # show the top-5 neighbors
     
-    #... (your code here)
+    best_match, D = find_best_match(model_images, query_images, dist_type, hist_type, num_bins)
+
+    D_sorted = np.argsort(D, axis=0)
+
+    for j in range(D_sorted.shape[1]):
+        img = np.array(Image.open(query_images[j]))
+        plt.subplot(3, 6, j*6+1)
+        plt.title("Q" + str(j))
+        plt.axis("off")
+        plt.imshow(img)
+        i = 0
+        for model_img_i in D_sorted[:num_nearest, j]:
+            i += 1
+            img_match = np.array(Image.open(model_images[model_img_i]))
+            plt.subplot(3, 6, j*6+1+i)
+            d = round(D[model_img_i, j], 2)
+            plt.title("M" + str(d))
+            plt.axis("off")
+            plt.imshow(img_match)
+    plt.show()
+
 

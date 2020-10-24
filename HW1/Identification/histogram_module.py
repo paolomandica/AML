@@ -33,9 +33,9 @@ def normalized_hist(img_gray, num_bins):
       i = int(value/step_unit)
       hists[i] += 1
 
-    bins = [i*step_unit for i in range(num_bins+1)]
+    bins = np.array([i*step_unit for i in range(num_bins+1)])
 
-    return hists, np.array(bins)
+    return hists, bins
 
 
 #  Compute the *joint* histogram for each color channel in the image
