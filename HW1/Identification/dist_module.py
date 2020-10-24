@@ -16,7 +16,8 @@ def dist_intersect(x,y):
       raise AssertionError()
 
     lung = len(x)
-    dist = .5 * ( ([sum(x[i], y[i]) for i in range(lung)] / sum(x)) + ([sum(x[i], y[i]) for i in range(lung)] / sum(y)) )
+    numerator = sum([min(x[i], y[i]) for i in range(lung)])
+    dist = .5 * (numerator/sum(x) + numerator/sum(y))
 
     if not 0 <= dist and dist <= 1:
       raise AssertionError()

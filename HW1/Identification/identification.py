@@ -9,6 +9,9 @@ import dist_module
 import match_module
 import rpc_module
 
+import os
+os.chdir('HW1/Identification')
+
 
 def rgb2gray(rgb):
 
@@ -19,7 +22,7 @@ def rgb2gray(rgb):
 
 
 # gray-value histograms (Question 2.a)
-img_color = np.array(Image.open(r'HW1/Identification/model/obj100__0.png'))
+img_color = np.array(Image.open('./model/obj100__0.png'))
 img_gray = rgb2gray(img_color.astype('double'))
 
 plt.figure(1)
@@ -65,7 +68,7 @@ plt.bar(np.array(range(1, hist_rg.size+1)), hist_rg)
 plt.show()
 
 # Compose and test dxdy histograms (histogram_module.dxdy_hist)
-plt.figure(5)
+plt.figure(4)
 plt.subplot(1, 2, 1)
 plt.imshow(img_color)
 
