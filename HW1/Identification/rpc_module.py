@@ -32,14 +32,15 @@ def plot_rpc(D, plot_color):
     l = l[sortidx]
     
     tp = 0
-    #... (your code here)
+    fp = 0
     
     for idt in range(len(d)):
         tp += l[idt]
-        #... (your code here)
+        fp += 1 - l[idt]
         
         #Compute precision and recall values and append them to "recall" and "precision" vectors
-        #... (your code here)
+        precision.append(tp/(tp+fp))
+        recall.append(tp/sum(l))
     
     plt.plot([1-precision[i] for i in range(len(precision))], recall, plot_color+'-')
 

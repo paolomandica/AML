@@ -220,33 +220,34 @@ for k, v in num_correct_dict.items():
 
 # plot recall_precision curves (Question 4)
 
-# with open('model.txt') as fp:
-#     model_images = fp.readlines()
-# model_images = [x.strip() for x in model_images]
+with open('model.txt') as fp:
+    model_images = fp.readlines()
+model_images = [x.strip() for x in model_images]
 
-# with open('query.txt') as fp:
-#     query_images = fp.readlines()
-# query_images = [x.strip() for x in query_images]
-
-# num_bins = 20
+with open('query.txt') as fp:
+    query_images = fp.readlines()
+query_images = [x.strip() for x in query_images]
 
 
-# plt.figure(8)
-# rpc_module.compare_dist_rpc(model_images, query_images, [
-#                             'chi2', 'intersect', 'l2'], 'rg', num_bins, ['r', 'g', 'b'])
-# plt.title('RG histograms')
-# plt.show()
+def plot(hist_type):
+    plt.figure(figsize=(26, 12))
+    plt.suptitle(hist_type.upper() + " histograms", fontsize = 14)
+
+    i = 0
+    for num_bins in [20, 30, 40]:
+        i += 1
+
+        if hist_type == 'rgb':
+            num_bins = num_bins // 2
+
+        plt.subplot(1, 3, i)
+        plt.title(str(num_bins) + " bins")
+        rpc_module.compare_dist_rpc(model_images, query_images, [
+                                    'chi2', 'intersect', 'l2'], hist_type, num_bins, ['r', 'g', 'b'])
+
+    plt.savefig("./plots/plt_" + hist_type + ".png")
+    plt.show()
 
 
-# plt.figure(9)
-# rpc_module.compare_dist_rpc(model_images, query_images, [
-#                             'chi2', 'intersect', 'l2'], 'rgb', num_bins // 2, ['r', 'g', 'b'])
-# plt.title('RGB histograms')
-# plt.show()
-
-
-# plt.figure(10)
-# rpc_module.compare_dist_rpc(model_images, query_images, [
-#                             'chi2', 'intersect', 'l2'], 'dxdy', num_bins, ['r', 'g', 'b'])
-# plt.title('dx/dy histograms')
-# plt.show()
+for hist_type in ['rg', 'rgb', 'dxdy']:
+    plot(hist_type)
