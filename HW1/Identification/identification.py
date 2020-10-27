@@ -171,7 +171,7 @@ print('%s-%s, %s-%s, %s-%s, %s-%s' %
       ('chi2', 'grayvalue', 'chi2', 'rgb', 'chi2', 'rg', 'chi2', 'dxdy'))
 
 
-# Find best match (Question 3.a)
+# # Find best match (Question 3.a)
 
 with open('model.txt') as fp:
     model_images = fp.readlines()
@@ -185,8 +185,8 @@ dist_type = 'intersect'
 hist_type = 'rgb'
 num_bins = 30
 
-# [best_match, D] = match_module.find_best_match(
-#     model_images, query_images, dist_type, hist_type, num_bins)
+[best_match, D] = match_module.find_best_match(
+    model_images, query_images, dist_type, hist_type, num_bins)
 
 
 # visualize nearest neighbors (Question 3.b)
@@ -201,21 +201,25 @@ dist_type_list = ['intersect', 'chi2', 'l2']
 hist_type_list = ['grayvalue', 'rgb', 'rg', 'dxdy']
 
 num_correct_dict = {}
-for dist_type in dist_type_list:
-    for hist_type in hist_type_list:
-        print("\nComputing (%s, %s)..." % (dist_type, hist_type))
-        best_match, _ = match_module.find_best_match(
-            model_images, query_images, dist_type, hist_type, num_bins)
-        num_correct = sum(best_match == np.arange(len(query_images)))
-        perc = 1.0 * num_correct / len(query_images)
-        num_correct_dict[(dist_type, hist_type)] = (num_correct, perc)
+for num_bins in [20, 30, 40]:
+    for dist_type in dist_type_list:
+        for hist_type in hist_type_list:
+            print("\nComputing (%s, %s, %d)..." % (dist_type, hist_type, num_bins))
+            best_match, _ = match_module.find_best_match(
+                model_images, query_images, dist_type, hist_type, num_bins)
+            num_correct = sum(best_match == np.arange(len(query_images)))
+            perc = 1.0 * num_correct / len(query_images)
+            num_correct_dict[(dist_type, hist_type, num_bins)] = (num_correct, round(perc, 3))
 
 num_correct_dict = {k: v for k, v in sorted(num_correct_dict.items(), key=lambda item: item[1], reverse=True)}
+with open('./plots/num_correct.txt', 'w') as fp:
+    for k, v in num_correct_dict.items():
+        fp.write(str(k) + ": " + str(v))
+        fp.write("\n")
 
 print()
 for k, v in num_correct_dict.items():
-    print("Combination: ", k)
-    print('number of correct matches: %d (%f)\n' % (v[0], v[1]))
+    print(k, " -> number of correct matches: %d (%f)\n" % (v[0], v[1]))
 
 
 # plot recall_precision curves (Question 4)
@@ -231,7 +235,6 @@ query_images = [x.strip() for x in query_images]
 
 def plot(hist_type):
     plt.figure(figsize=(26, 12))
-    plt.suptitle(hist_type.upper() + " histograms", fontsize = 14)
 
     i = 0
     for num_bins in [20, 30, 40]:
@@ -241,7 +244,7 @@ def plot(hist_type):
             num_bins = num_bins // 2
 
         plt.subplot(1, 3, i)
-        plt.title(str(num_bins) + " bins")
+        plt.title(str(num_bins) + " bins", {'fontsize': 24})
         rpc_module.compare_dist_rpc(model_images, query_images, [
                                     'chi2', 'intersect', 'l2'], hist_type, num_bins, ['r', 'g', 'b'])
 
