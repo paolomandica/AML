@@ -198,10 +198,10 @@ match_module.show_neighbors(
 # compute recognition percentage (Question 3.c)
 # import ipdb; ipdb.set_trace()
 dist_type_list = ['intersect', 'chi2', 'l2']
-hist_type_list = ['grayvalue', 'rgb', 'rg', 'dxdy']
+hist_type_list = ['rgb', 'rg', 'dxdy']
 
 num_correct_dict = {}
-for num_bins in [50]:  # [5, 10, 30, 50]
+for num_bins in [5, 10, 30, 50]:
     for dist_type in dist_type_list:
         for hist_type in hist_type_list:
             print("Computing (%s, %s, %d)..." % (dist_type, hist_type, num_bins))
@@ -237,14 +237,11 @@ def plot(hist_type):
     plt.figure(figsize=(24, 16))
 
     i = 0
-    for num_bins in [5, 10, 30, 50]:
+    for num_bins in [10, 30, 50]:
         i += 1
         print("Computing %s with %d bins..." % (hist_type, num_bins))
 
-        if hist_type == 'rgb':
-            num_bins = num_bins // 2
-
-        plt.subplot(2, 2, i)
+        plt.subplot(1, 3, i)
         plt.subplots_adjust(hspace=0.5)
         plt.title(str(num_bins) + " bins", {'fontsize': 24})
         rpc_module.compare_dist_rpc(model_images, query_images, [

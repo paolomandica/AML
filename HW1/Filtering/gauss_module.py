@@ -57,6 +57,11 @@ def gaussdx(sigma):
     # Derive gaussian filter
     Dx = np.gradient(Gx)
 
+    ### We also tried a manual implementation of the Gaussian derivative
+    ### filter and, since the result is the same, we kept the numpy version.
+    # x = np.arange(int(-3*sigma), int(3*sigma+1))
+    # Dx = -1/(np.sqrt(2*np.pi)*sigma**3)*x*np.exp(-x**2/ (2 * sigma**2))
+
     return Dx, x
 
 

@@ -35,6 +35,9 @@ def normalized_hist(img_gray, num_bins):
 
     bins = np.array([i*step_unit for i in range(num_bins+1)])
 
+    # Normalize the histogram such that its integral (sum) is equal 1
+    hists = hists / np.sum(hists)
+
     return hists, bins
 
 

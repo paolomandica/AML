@@ -8,11 +8,8 @@ import math
 # Check that the distance range in [0,1]
 
 def dist_intersect(x,y):
-    
-    # L'HO VISTO ALLA FINE, IL CHECK DELLE ASSERTION PUO' ESSERE FATTO IN QUESTO MODO O SEMPLICEMENTE
-    # COME FA GALASSO NELL'ULTIMA RIGA DI QUESTO FILE, SCEGLIETE VOI
-    # assert len(x)==len(y) 
-    assert len(x)==len(y), "X e Y hanno lunghezza diversa"
+    if not len(x) == len(y):
+        raise AssertionError()
 
     lung = len(x)
     numerator = sum([min(x[i], y[i]) for i in range(lung)])
