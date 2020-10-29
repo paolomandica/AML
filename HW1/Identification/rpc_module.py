@@ -59,12 +59,12 @@ def compare_dist_rpc(model_images, query_images, dist_types, hist_type, num_bins
 
     plt.axis([0, 1, 0, 1]);
     plt.xlabel('1 - precision', fontdict={'fontsize': 22});
-    plt.ylabel('recall', fontdict={'fontsize': 22})
+    plt.ylabel('recall', fontdict={'fontsize': 22});
     plt.tick_params('both', labelsize=16)
     
     # legend(dist_types, 'Location', 'Best')
     
-    plt.legend( dist_types, loc='best')
+    plt.legend(dist_types, loc='best', fontsize=20)
 
 
 

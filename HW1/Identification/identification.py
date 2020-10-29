@@ -171,7 +171,7 @@ print('%s-%s, %s-%s, %s-%s, %s-%s' %
       ('chi2', 'grayvalue', 'chi2', 'rgb', 'chi2', 'rg', 'chi2', 'dxdy'))
 
 
-# # Find best match (Question 3.a)
+# Find best match (Question 3.a)
 
 with open('model.txt') as fp:
     model_images = fp.readlines()
@@ -201,10 +201,10 @@ dist_type_list = ['intersect', 'chi2', 'l2']
 hist_type_list = ['grayvalue', 'rgb', 'rg', 'dxdy']
 
 num_correct_dict = {}
-for num_bins in [20, 30, 40]:
+for num_bins in [50]:  # [5, 10, 30, 50]
     for dist_type in dist_type_list:
         for hist_type in hist_type_list:
-            print("\nComputing (%s, %s, %d)..." % (dist_type, hist_type, num_bins))
+            print("Computing (%s, %s, %d)..." % (dist_type, hist_type, num_bins))
             best_match, _ = match_module.find_best_match(
                 model_images, query_images, dist_type, hist_type, num_bins)
             num_correct = sum(best_match == np.arange(len(query_images)))
@@ -212,7 +212,7 @@ for num_bins in [20, 30, 40]:
             num_correct_dict[(dist_type, hist_type, num_bins)] = (num_correct, round(perc, 3))
 
 num_correct_dict = {k: v for k, v in sorted(num_correct_dict.items(), key=lambda item: item[1], reverse=True)}
-with open('./plots/num_correct.txt', 'w') as fp:
+with open('./plots/num_correct.txt', 'a') as fp:
     for k, v in num_correct_dict.items():
         fp.write(str(k) + ": " + str(v))
         fp.write("\n")
@@ -234,16 +234,18 @@ query_images = [x.strip() for x in query_images]
 
 
 def plot(hist_type):
-    plt.figure(figsize=(26, 12))
+    plt.figure(figsize=(24, 16))
 
     i = 0
-    for num_bins in [20, 30, 40]:
+    for num_bins in [5, 10, 30, 50]:
         i += 1
+        print("Computing %s with %d bins..." % (hist_type, num_bins))
 
         if hist_type == 'rgb':
             num_bins = num_bins // 2
 
-        plt.subplot(1, 3, i)
+        plt.subplot(2, 2, i)
+        plt.subplots_adjust(hspace=0.5)
         plt.title(str(num_bins) + " bins", {'fontsize': 24})
         rpc_module.compare_dist_rpc(model_images, query_images, [
                                     'chi2', 'intersect', 'l2'], hist_type, num_bins, ['r', 'g', 'b'])
@@ -254,3 +256,4 @@ def plot(hist_type):
 
 for hist_type in ['rg', 'rgb', 'dxdy']:
     plot(hist_type)
+    print()
