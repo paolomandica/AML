@@ -74,13 +74,3 @@ def gaussderiv(img, sigma):
     imgDy = np.apply_along_axis(convolve, 1, img, kernel, mode="same")
 
     return imgDx, imgDy
-
-
-if __name__ == "__main__":
-
-    Gx, x = gauss(4)
-
-    print("x: ", x)
-    print()
-    print("Gx: ", Gx)
-    print()
