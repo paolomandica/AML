@@ -237,17 +237,17 @@ def plot(hist_type):
     plt.figure(figsize=(24, 16))
 
     i = 0
-    for num_bins in [10, 30, 50]:
+    for num_bins in [5, 10, 30, 50]:
         i += 1
         print("Computing %s with %d bins..." % (hist_type, num_bins))
 
-        plt.subplot(1, 3, i)
+        plt.subplot(2, 2, i)
         plt.subplots_adjust(hspace=0.5)
         plt.title(str(num_bins) + " bins", {'fontsize': 24})
         rpc_module.compare_dist_rpc(model_images, query_images, [
                                     'chi2', 'intersect', 'l2'], hist_type, num_bins, ['r', 'g', 'b'])
 
-    plt.savefig("./plots/plt_" + hist_type + ".png")
+    # plt.savefig("./plots/plt_" + hist_type + ".png")
     plt.show()
 
 
