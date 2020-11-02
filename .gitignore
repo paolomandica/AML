@@ -263,4 +263,4 @@ dmypy.json
 HW1\Identification\model
 HW1\Identification\query
 .vscode/launch.json
-HW2\cifar-10-batches-py
+HW2/cifar-10-batches-py/
