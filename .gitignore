@@ -257,6 +257,7 @@ dmypy.json
 
 #### FILES ####
 *.png
+*.zip
 
 #### FOLDERS ####
 HW1\Identification\model
