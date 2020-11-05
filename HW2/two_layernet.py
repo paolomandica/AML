@@ -3,7 +3,7 @@ from __future__ import print_function
 from builtins import range
 from builtins import object
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 try:
     xrange          # Python 2
 except NameError:
@@ -84,7 +84,6 @@ class TwoLayerNet(object):
 
         # Compute the forward pass
         scores = 0.
-        
         #############################################################################
         # TODO: Perform the forward pass, computing the class probabilities for the #
         # input. Store the result in the scores variable, which should be an array  #
@@ -92,7 +91,23 @@ class TwoLayerNet(object):
         #############################################################################
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        #a1 = X 
+        #Z2 = np.dot(W1.T,a1.T) + np.reshape(b1,(len(b1),-1))
+        #a2 = np.maximum(0, Z2)
+        #Z3 = np.dot(W2.T, a2) + np.reshape(b2,(len(b2),-1))
+        a1 = X
+        Z2 = a1@W1 + b1
+        a2 = np.maximum(0, Z2)
+        Z3 = a2@W2 + b2
 
+
+        def softmax(vector):
+            e = np.exp(vector)
+            return e / np.sum(e)
+        a3 = np.apply_along_axis(softmax,1,Z3)
+        scores = a3
+
+    
         
 
         pass

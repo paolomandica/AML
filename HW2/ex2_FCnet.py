@@ -4,7 +4,7 @@
 # out on the CIFAR-10 dataset.  A bit of setup
 #-----------------------------------------------------------------------------------
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from two_layernet import TwoLayerNet
 from gradient_check import eval_numerical_gradient
 from data_utils import get_CIFAR10_data
