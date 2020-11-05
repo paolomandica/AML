@@ -4,7 +4,7 @@ from builtins import range
 from six.moves import cPickle as pickle
 import numpy as np
 import os
-#from matplotlib.pyplot import imread
+from matplotlib.pyplot import imread
 import platform
 #Alternative for imread
 #from scipy.misc import imread

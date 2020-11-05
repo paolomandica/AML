@@ -3,7 +3,7 @@ from __future__ import print_function
 from builtins import range
 from builtins import object
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 try:
     xrange          # Python 2
 except NameError:
