@@ -153,6 +153,24 @@ class TwoLayerNet(object):
 
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         
+        delta = np.zeros(shape = a3.shape)
+        delta[np.arange(N),y] = 1
+      
+
+        g_z3 = (1/a1.shape[0])*(scores-delta) #shape (5,3) 
+        grads['W2'] = np.transpose(g_z3.T @ a2 + 2*reg*W2.T)
+        grads['b2'] = np.transpose(np.sum(g_z3, axis = 0))
+
+
+        temp = (Z2 > 0).astype(int)
+      
+
+        g_z2 = (W2 @ g_z3.T) * temp.T
+
+        grads['W1'] = np.transpose(g_z2 @ a1 + 2*reg*W1.T)
+        grads['b1'] = np.transpose(np.sum(g_z2.T, axis = 0))
+
+         
         
 
         pass

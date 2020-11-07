@@ -265,3 +265,5 @@ HW1\Identification\query
 .vscode/launch.json
 HW2/cifar-10-batches-py/
 .vscode/settings.json
+cifar-10-batches-py/
+datasets/
