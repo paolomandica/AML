@@ -23,7 +23,7 @@ print('Using device: %s'%device)
 # Hyper-parameters
 #--------------------------------
 input_size = 32 * 32 * 3
-hidden_size = [50]
+hidden_size = [50, 50]
 num_classes = 10
 num_epochs = 10
 batch_size = 200
@@ -32,7 +32,7 @@ learning_rate_decay = 0.95
 reg=0.001
 num_training= 49000
 num_validation =1000
-train = True
+train = False
 
 #-------------------------------------------------
 # Load the CIFAR-10 dataset
@@ -112,7 +112,16 @@ class MultiLayerPerceptron(nn.Module):
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        
+        layers.append(nn.Linear(input_size, hidden_layers[0]))
+        layers.append(nn.ReLU())
+
+        prev_n = hidden_layers[0]
+        for n in hidden_layers[1:]:
+            layers.append(nn.Linear(prev_n, n))
+            layers.append(nn.ReLU())
+            prev_n = n
+
+        layers.append(nn.Linear(hidden_layers[-1], num_classes))
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -130,7 +139,8 @@ class MultiLayerPerceptron(nn.Module):
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-
+        x = x.view(-1, input_size)
+        out = self.layers(x)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         
@@ -169,7 +179,11 @@ if train:
             #################################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-
+            y_pred = model(images)
+            loss = criterion(y_pred, labels)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -193,7 +207,8 @@ if train:
                 ####################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            
+                predicted = model(images)
+                predicted = torch.max(predicted, 1)[1]
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
                 total += labels.size(0)
@@ -216,14 +231,14 @@ if train:
     ##################################################################################
 
     # Save the model checkpoint
-    torch.save(model.state_dict(), 'model.ckpt')
+    torch.save(model.state_dict(), 'model_2.ckpt')
 
 else:
     # Run the test code once you have your by setting train flag to false
     # and loading the best model
 
     best_model = None
-    best_model = torch.load('model.ckpt')
+    best_model = torch.load('model_2.ckpt')
     
     model.load_state_dict(best_model)
     
@@ -244,7 +259,8 @@ else:
             ####################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            
+            predicted = model(images)
+            predicted = torch.max(predicted, 1)[1]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             total += labels.size(0)
