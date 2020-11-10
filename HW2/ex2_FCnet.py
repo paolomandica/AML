@@ -192,7 +192,6 @@ stats = net.train(X_train, y_train, X_val, y_val,
 val_acc = (net.predict(X_val) == y_val).mean()
 print('Validation accuracy: ', val_acc)
 
-
 # Debug the training
 # With the default parameters we provided above, you should get a validation
 # accuracy of about 0.29 on the validation set, which is not very good.
@@ -276,8 +275,33 @@ best_net = None # store the best model into this
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 
+input_size = 32 * 32 * 3
+hidden_size = [200]
+batch_size = [200]
+reg = [0.01]
+learning_rate = [0.001]
+num_classes = 10
+val_acc = 0
+for h_s in hidden_size:
+# Train the network
+    for b_s in batch_size:
+        for r in reg:
+            for l_r in learning_rate:
+                net = TwoLayerNet(input_size, h_s, num_classes)
+                stats = net.train(X_train, y_train, X_val, y_val,
+                        num_iters=3000, batch_size=b_s,
+                        learning_rate=l_r, learning_rate_decay=0.95,
+                        reg=r, verbose=True)
 
-pass
+                # Predict on the validation set
+                new_val_acc = (net.predict(X_val) == y_val).mean()
+                if new_val_acc > val_acc:
+                    opt = [h_s,b_s,r,l_r]
+                    val_acc = new_val_acc
+                    best_net = net
+                print('Parameters:', opt)
+                print('Validation accuracy: ', val_acc)
+                pass
 
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 

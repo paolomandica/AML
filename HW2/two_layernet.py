@@ -222,9 +222,14 @@ class TwoLayerNet(object):
             #########################################################################
             
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-            
-            
-            
+            shuffler = np.random.permutation(num_train)
+         
+            if X_batch.shape[0] < batch_size:
+                X_batch = X_batch[shuffler]
+                y_batch = y_batch[shuffler]
+            else:
+                X_batch = X_batch[shuffler][:batch_size]
+                y_batch = y_batch[shuffler][:batch_size]
             pass
         
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -241,6 +246,10 @@ class TwoLayerNet(object):
             #########################################################################
             
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+            self.params['W1'] -=  learning_rate * grads['W1'] 
+            self.params['b1'] -=  learning_rate * grads['b1'] 
+            self.params['W2'] -=  learning_rate * grads['W2'] 
+            self.params['b2'] -=  learning_rate * grads['b2'] 
             
             
             
@@ -292,9 +301,8 @@ class TwoLayerNet(object):
         ###########################################################################
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-
-
+        pred = self.loss(X)
+        y_pred = np.argmax(pred,axis = 1 )
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
