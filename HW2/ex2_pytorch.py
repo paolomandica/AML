@@ -23,16 +23,16 @@ print('Using device: %s'%device)
 # Hyper-parameters
 #--------------------------------
 input_size = 32 * 32 * 3
-hidden_size = [50, 50]
+hidden_size = [50, 50, 50]
 num_classes = 10
 num_epochs = 10
-batch_size = 200
-learning_rate = 1e-3
+batch_size = 128
+learning_rate = 1e-2
 learning_rate_decay = 0.95
 reg=0.001
 num_training= 49000
 num_validation =1000
-train = False
+train = True
 
 #-------------------------------------------------
 # Load the CIFAR-10 dataset
@@ -115,11 +115,12 @@ class MultiLayerPerceptron(nn.Module):
         layers.append(nn.Linear(input_size, hidden_layers[0]))
         layers.append(nn.ReLU())
 
-        prev_n = hidden_layers[0]
-        for n in hidden_layers[1:]:
-            layers.append(nn.Linear(prev_n, n))
-            layers.append(nn.ReLU())
-            prev_n = n
+        if len(hidden_layers) > 1:
+            prev_n = hidden_layers[0]
+            for n in hidden_layers[1:]:
+                layers.append(nn.Linear(prev_n, n))
+                layers.append(nn.ReLU())
+                prev_n = n
 
         layers.append(nn.Linear(hidden_layers[-1], num_classes))
 
@@ -231,14 +232,14 @@ if train:
     ##################################################################################
 
     # Save the model checkpoint
-    torch.save(model.state_dict(), 'model_2.ckpt')
+    torch.save(model.state_dict(), 'model_3.ckpt')
 
 else:
     # Run the test code once you have your by setting train flag to false
     # and loading the best model
 
     best_model = None
-    best_model = torch.load('model_2.ckpt')
+    best_model = torch.load('model_3.ckpt')
     
     model.load_state_dict(best_model)
     
