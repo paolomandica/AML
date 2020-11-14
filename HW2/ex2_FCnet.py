@@ -289,7 +289,7 @@ for h_s in hidden_size:
             for l_r in learning_rate:
                 net = TwoLayerNet(input_size, h_s, num_classes)
                 stats = net.train(X_train, y_train, X_val, y_val,
-                        num_iters=3000, batch_size=b_s,
+                        num_iters=1000, batch_size=b_s,
                         learning_rate=l_r, learning_rate_decay=0.95,
                         reg=r, verbose=True)
 
@@ -318,3 +318,26 @@ show_net_weights(best_net)
 test_acc = (best_net.predict(X_test) == y_test).mean()
 print('Test accuracy: ', test_acc)
 
+# Plot the loss function and train / validation accuracies
+plt.figure(6)
+plt.subplot(2, 1, 1)
+plt.plot(stats['loss_history'])
+plt.title('Loss history')
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+
+plt.subplot(2, 1, 2)
+plt.plot(stats['train_acc_history'], label='train')
+plt.plot(stats['val_acc_history'], label='val')
+plt.title('Classification accuracy history')
+plt.xlabel('Epoch')
+plt.ylabel('Classification accuracy')
+plt.legend()
+plt.show()
+
+
+# Visualize the weights of the network
+
+# visualize the weights of the best network
+plt.figure(7)
+show_net_weights(net)
