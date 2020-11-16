@@ -84,6 +84,7 @@ class TwoLayerNet(object):
 
         # Compute the forward pass
         scores = 0.
+
         #############################################################################
         # TODO: Perform the forward pass, computing the class probabilities for the #
         # input. Store the result in the scores variable, which should be an array  #
@@ -91,26 +92,16 @@ class TwoLayerNet(object):
         #############################################################################
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        #a1 = X 
-        #Z2 = np.dot(W1.T,a1.T) + np.reshape(b1,(len(b1),-1))
-        #a2 = np.maximum(0, Z2)
-        #Z3 = np.dot(W2.T, a2) + np.reshape(b2,(len(b2),-1))
         a1 = X
         Z2 = a1@W1 + b1
         a2 = np.maximum(0, Z2)
         Z3 = a2@W2 + b2
-
 
         def softmax(vector):
             e = np.exp(vector)
             return e / np.sum(e)
         a3 = np.apply_along_axis(softmax,1,Z3)
         scores = a3
-
-    
-        
-
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -138,7 +129,6 @@ class TwoLayerNet(object):
         n1 = np.linalg.norm(W1, 'fro')**2
         n2 = np.linalg.norm(W2, 'fro')**2
         loss = j + reg*(n1 + n2)    
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -155,25 +145,16 @@ class TwoLayerNet(object):
         
         delta = np.zeros(shape = a3.shape)
         delta[np.arange(N),y] = 1
-      
 
         g_z3 = (1/a1.shape[0])*(scores-delta) #shape (5,3) 
         grads['W2'] = np.transpose(g_z3.T @ a2 + 2*reg*W2.T)
         grads['b2'] = np.transpose(np.sum(g_z3, axis = 0))
 
-
         temp = (Z2 > 0).astype(int)
-      
-
         g_z2 = (W2 @ g_z3.T) * temp.T
 
         grads['W1'] = np.transpose(g_z2 @ a1 + 2*reg*W1.T)
         grads['b1'] = np.transpose(np.sum(g_z2.T, axis = 0))
-
-         
-        
-
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -223,13 +204,10 @@ class TwoLayerNet(object):
             
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-
-           
             idx_epoch = it//iterations_per_epoch
             if it%iterations_per_epoch == 0:
                 shuffler = np.random.permutation(num_train)
                 count = 0
-
 
 
             start = count  * batch_size
@@ -275,9 +253,6 @@ class TwoLayerNet(object):
             self.params['b1'] -=  learning_rate * grads['b1'] 
             self.params['W2'] -=  learning_rate * grads['W2'] 
             self.params['b2'] -=  learning_rate * grads['b2'] 
-            
-            
-            pass
         
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -327,7 +302,6 @@ class TwoLayerNet(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         pred = self.loss(X)
         y_pred = np.argmax(pred,axis = 1 )
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
