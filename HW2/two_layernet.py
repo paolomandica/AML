@@ -222,9 +222,39 @@ class TwoLayerNet(object):
             #########################################################################
             
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-            
-            
-            
+
+
+           
+            idx_epoch = it//iterations_per_epoch
+            if it%iterations_per_epoch == 0:
+                shuffler = np.random.permutation(num_train)
+                count = 0
+
+
+
+            start = count  * batch_size
+            end = (count + 1) * batch_size 
+            batch_indexes = shuffler[start:end]
+              
+            X_batch = X_batch[batch_indexes]
+            y_batch = y_batch[batch_indexes]
+
+            count += 1
+         
+            ''' if X_batch.shape[0] < batch_size:
+                X_batch = X_batch[shuffler]
+                y_batch = y_batch[shuffler]
+            else:
+
+                X_batch = X_batch[shuffler][:batch_size]
+                y_batch = y_batch[shuffler][:batch_size]
+
+            idx = np.arange(X_batch.shape[0])
+            #np.take(X, np.random.permutation(idx), out=X)#shuffle copy of the array
+            idx = np.random.permutation(idx)
+            #in order to evaluate a shuffle subset of addendumsn to each iteration
+            X_batch=X[idx[0:200]] #batchsize
+            y_batch= y[idx[0:200]]'''
             pass
         
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -241,7 +271,10 @@ class TwoLayerNet(object):
             #########################################################################
             
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-            
+            self.params['W1'] -=  learning_rate * grads['W1'] 
+            self.params['b1'] -=  learning_rate * grads['b1'] 
+            self.params['W2'] -=  learning_rate * grads['W2'] 
+            self.params['b2'] -=  learning_rate * grads['b2'] 
             
             
             pass
@@ -292,9 +325,8 @@ class TwoLayerNet(object):
         ###########################################################################
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-
-
+        pred = self.loss(X)
+        y_pred = np.argmax(pred,axis = 1 )
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
