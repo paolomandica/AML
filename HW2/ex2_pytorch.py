@@ -23,15 +23,15 @@ print('Using device: %s'%device)
 # Hyper-parameters
 #--------------------------------
 input_size = 32 * 32 * 3
-hidden_size = [100,100,100]
+hidden_size = [200, 200, 100]
 num_classes = 10
 num_epochs = 10
-batch_size = 100
+batch_size = 200
 learning_rate = 1e-3
 learning_rate_decay = 0.95
 reg=0.001
-num_training= 49000
-num_validation =1000
+num_training= 45000
+num_validation = 5000
 train = True
 
 #-------------------------------------------------
@@ -112,14 +112,18 @@ class MultiLayerPerceptron(nn.Module):
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+        activation = nn.ReLU()
+        # activation = nn.LeakyReLU()
+        # activation = nn.PReLU()
+
         layers.append(nn.Linear(input_size, hidden_layers[0]))
-        layers.append(nn.ReLU())
+        layers.append(activation)
 
         if len(hidden_layers) > 1:
             prev_n = hidden_layers[0]
             for n in hidden_layers[1:]:
                 layers.append(nn.Linear(prev_n, n))
-                layers.append(nn.ReLU())
+                layers.append(activation)
                 prev_n = n
 
         layers.append(nn.Linear(hidden_layers[-1], num_classes))
@@ -156,7 +160,7 @@ for param_tensor in model.state_dict():
 '''
 
 if train:
-    model.apply(weights_init)
+    # model.apply(weights_init)
     model.train() #set dropout and batch normalization layers to training mode
 
     # Loss and optimizer
