@@ -165,6 +165,8 @@ for param_tensor in model.state_dict():
 
 if train:
     # model.apply(weights_init)
+    # we commented this line to let the model initialize the weights by default
+    # otherwise, with 3 or more layers, the model is not able to learn.
     model.train() #set dropout and batch normalization layers to training mode
 
     # Loss and optimizer
@@ -240,14 +242,14 @@ if train:
     ##################################################################################
 
     # Save the model checkpoint
-    torch.save(model.state_dict(), 'model_3.ckpt')
+    torch.save(model.state_dict(), 'model.ckpt')
 
 else:
     # Run the test code once you have your by setting train flag to false
     # and loading the best model
 
     best_model = None
-    best_model = torch.load('model_3.ckpt')
+    best_model = torch.load('model.ckpt')
     
     model.load_state_dict(best_model)
     

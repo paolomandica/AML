@@ -272,49 +272,57 @@ best_net = None # store the best model into this
 # write code to sweep through possible combinations of hyperparameters          #
 #################################################################################
 
-# **START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)**
-
+# *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 input_size = 32 * 32 * 3
-hidden_size = 200
-batch_size = 200
-reg = 0.01
-learning_rate = 0.001
+hidden_size = [200]     # [50, 100, 200]
+batch_size = [200]      # [64, 128, 200]
+reg = [0.01]            # [0.001, 0.01]
+learning_rate = [0.001] # [0.001, 0.01]
 num_classes = 10
+val_acc = 0
+for h_s in hidden_size:
+    for b_s in batch_size:
+        for r in reg:
+            for l_r in learning_rate:
+                net = TwoLayerNet(input_size, h_s, num_classes)
+                stats = net.train(X_train, y_train, X_val, y_val,
+                                  num_iters=5000, batch_size=b_s,
+                                  learning_rate=l_r, learning_rate_decay=0.95,
+                                  reg=r, verbose=True)
 
+                # Predict on the validation set
+                new_val_acc = (net.predict(X_val) == y_val).mean()
+                if new_val_acc > val_acc:
+                    opt = [h_s, b_s, r, l_r]
+                    val_acc = new_val_acc
+                    best_net = net
+                    best_stats = stats
+                print('Parameters:', opt)
+                print('Validation accuracy: ', val_acc)
+                pass
 
-net = TwoLayerNet(input_size, hidden_size, num_classes)
-stats = net.train(X_train, y_train, X_val, y_val,
-                  num_iters=5000, batch_size=batch_size,
-                  learning_rate=learning_rate, learning_rate_decay=0.95,
-                  reg=reg, verbose=True)
-
-# Predict on the validation set
-val_acc = (net.predict(X_val) == y_val).mean()
-print('Validation accuracy: ', val_acc)
-
-
-# **END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)**
+# *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 
 # Run on the test set
 # When you are done experimenting, you should evaluate your final trained
 # network on the test set; you should get above 48%.
 
-test_acc = (net.predict(X_test) == y_test).mean()
+test_acc = (best_net.predict(X_test) == y_test).mean()
 print('Test accuracy: ', test_acc)
 
 # Plot the loss function and train / validation accuracies
 plt.figure(6)
 plt.subplot(2, 1, 1)
-plt.plot(stats['loss_history'])
+plt.plot(best_stats['loss_history'])
 plt.title('Loss history')
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 
 plt.subplot(2, 1, 2)
-plt.plot(stats['train_acc_history'], label='train')
-plt.plot(stats['val_acc_history'], label='val')
+plt.plot(best_stats['train_acc_history'], label='train')
+plt.plot(best_stats['val_acc_history'], label='val')
 plt.title('Classification accuracy history')
 plt.xlabel('Epoch')
 plt.ylabel('Classification accuracy')
