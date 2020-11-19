@@ -23,14 +23,14 @@ print('Using device: %s'%device)
 # Hyper-parameters
 #--------------------------------
 input_size = 32 * 32 * 3
-hidden_size = [200, 200, 100]
+hidden_size = [400, 400, 400]
 num_classes = 10
 num_epochs = 10
 batch_size = 200
 learning_rate = 1e-3
 learning_rate_decay = 0.95
 reg=0.001
-num_training= 45000
+num_training = 45000
 num_validation = 5000
 train = True
 
@@ -112,18 +112,22 @@ class MultiLayerPerceptron(nn.Module):
         
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        activation = nn.ReLU()
-        # activation = nn.LeakyReLU()
+        # activation = nn.ReLU()
+        activation = nn.LeakyReLU(0.1)
         # activation = nn.PReLU()
 
         layers.append(nn.Linear(input_size, hidden_layers[0]))
         layers.append(activation)
+        layers.append(nn.BatchNorm1d(hidden_layers[0]))
+        # layers.append(nn.Dropout(0.2))
 
         if len(hidden_layers) > 1:
             prev_n = hidden_layers[0]
             for n in hidden_layers[1:]:
                 layers.append(nn.Linear(prev_n, n))
                 layers.append(activation)
+                layers.append(nn.BatchNorm1d(n))
+                # layers.append(nn.Dropout(0.2))
                 prev_n = n
 
         layers.append(nn.Linear(hidden_layers[-1], num_classes))
