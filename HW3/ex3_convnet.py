@@ -111,8 +111,17 @@ class ConvNet(nn.Module):
         #################################################################################
         layers = []
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-
+        input_layer = input_size
+        n_layers = len(hidden_layers)
+        for layer in range(n_layers):
+            layers.append(nn.Sequential(
+            nn.Conv2d(input_layer, hidden_layers[layer], kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU()
+            ))
+            input_layer = hidden_layers[layer]
+        layers.append(nn.Linear(in_features=512, out_features=10))
+        self.layers = nn.Sequential(*layers)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -121,8 +130,10 @@ class ConvNet(nn.Module):
         # TODO: Implement the forward pass computations                                 #
         #################################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-
+        
+        x = self.layers[0:5](x) # do five conv layers
+        x = x.view(-1, np.prod([x.shape[i] for i in range(1, len(x.shape))]) ) # flatten: x was shape [200, 512, 1, 1]
+        out = self.layers[-1](x) # take last in output
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return out
@@ -141,8 +152,8 @@ def PrintModelSize(model, disp=True):
     #################################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-
-
+    model_sz = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(model_sz)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     return model_sz
 
@@ -160,7 +171,24 @@ def VisualizeFilter(model):
     #################################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    # take only first layer weights
+    weights = model.layers[0][(0)].weight.cpu().data.numpy()
+
+    # 128 filter = 16col*8row
+    col = 16
+    row =8
+    
+    max_ = np.amax(weights)
+    min_ = np.amin(weights)
+    fig = plt.figure(figsize=(row, col))
+    for w in range(len(weights)):
+        #for c in range(col):
+         #   for r in range(row):
+                fig.add_subplot(row, col, w+1)
+                plt.imshow((weights[w] - min_)/(max_ - min_))
+                plt.axis('off')
+    plt.show()
+        
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
