@@ -258,6 +258,7 @@ dmypy.json
 #### FILES ####
 *.png
 *.zip
+*.tar.gz
 
 #### FOLDERS ####
 HW1\Identification\model
@@ -266,3 +267,4 @@ HW1\Identification\query
 HW2/cifar-10-batches-py/
 .vscode/settings.json
 cifar-10-batches-py/
+HW3/.vscode/settings.json
