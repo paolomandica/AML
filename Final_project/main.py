@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing import image
 
 from learning import *
-from utils import get_train_data, get_config
 
 
 def show_images(im_sr, im_hr):
@@ -15,7 +14,7 @@ def show_images(im_sr, im_hr):
 
 if __name__ == "__main__":
     # training
-    train(g_pretrained=False, generic=False)
+    train(g_pretrained=True, n_trainable=1, generic=False)
 
     # # evaluation
     # im_sr, im_hr = evaluate()
