@@ -1,4 +1,5 @@
 tensorlayer>=2.0.0
-tensorflow>=2.0.0b1
+tensorflow==2.2.0
+scipy==1.2.1
 numpy==1.16.1
 easydict==1.9
