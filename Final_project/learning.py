@@ -36,11 +36,10 @@ tl.files.exists_or_mkdir(checkpoint_dir)
 
 def train(g_pretrained=False, n_trainable=None, generic=True):
     total_time = time.time()
-    # with tf.device('/device:GPU:0'): # aggiunto Ale
-    G = get_G((batch_size, 96, 96, 3))
-    D = get_D((batch_size, 384, 384, 3))
-    # era vgg19 ma non funziona più
-    VGG = tl.models.vgg16(pretrained=True, end_with='pool4', mode='static')
+
+    G = get_G((96, 96, 3))
+    D = get_D((384, 384, 3))
+    VGG = tf.keras.applications.VGG19(include_top=False)
 
     if generic:
         g_name = 'g'
@@ -54,18 +53,23 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
     g_optimizer = tf.optimizers.Adam(lr_v, beta_1=beta1)
     d_optimizer = tf.optimizers.Adam(lr_v, beta_1=beta1)
 
-    G.train()
-    D.train()
-    VGG.train()
+    # G.train()
+    # D.train()
+    # VGG.train()
 
-    train_ds = get_train_data(generic)
+    train_ds = get_train_data(config, generic)
 
     trainable_weights = G.trainable_weights
 
     if g_pretrained and n_trainable:
-        G.load_weights(os.path.join(checkpoint_dir, 'g_srgan.npz'))
+        weights = np.load(os.path.join(
+            checkpoint_dir, 'g_srgan.npz'), allow_pickle=True)
+        G.set_weights(weights['params'])
         nt = -n_trainable-1
-        trainable_weights = G.all_weights[:nt]
+        for layer in G.layers:
+            layer.trainable = False
+        for layer in G.layers[:nt]:
+            layer.trainable = True
 
     g_init_losses = []
     # initialize learning (G)
@@ -77,12 +81,10 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
                 break
             step_time = time.time()
             with tf.GradientTape() as tape:
-                G.all_weights[:nt] = trainable_weights
                 fake_hr_patchs = G(lr_patchs)
-                mse_loss = tl.cost.mean_squared_error(
-                    fake_hr_patchs, hr_patchs, is_mean=True)
-            grad = tape.gradient(mse_loss, trainable_weights)
-            g_optimizer_init.apply_gradients(zip(grad, trainable_weights))
+                mse_loss = tf.keras.losses.MSE(fake_hr_patchs, hr_patchs)
+            grad = tape.gradient(mse_loss, G.trainable_weights)
+            g_optimizer_init.apply_gradients(zip(grad, G.trainable_weights))
             print("Epoch: [{}/{}] step: [{}/{}] time: {:.3f}s, mse: {:.3f} ".format(
                 epoch, n_epoch_init, step, n_step_epoch, time.time() - step_time, mse_loss))
         if (epoch != 0) and (epoch % 10 == 0):
@@ -111,29 +113,28 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
                 # the pre-trained VGG uses the input range of [0, 1]
                 feature_fake = VGG((fake_patchs+1)/2.)
                 feature_real = VGG((hr_patchs+1)/2.)
-                d_loss1 = tl.cost.sigmoid_cross_entropy(
+                d_loss1 = tf.compat.v1.losses.sigmoid_cross_entropy(
                     logits_real, tf.ones_like(logits_real))
-                d_loss2 = tl.cost.sigmoid_cross_entropy(
+                d_loss2 = tf.compat.v1.losses.sigmoid_cross_entropy(
                     logits_fake, tf.zeros_like(logits_fake))
                 d_loss = d_loss1 + d_loss2  # discriminator loss
                 g_gan_loss = 1e-3 * \
-                    tl.cost.sigmoid_cross_entropy(
+                    tf.compat.v1.losses.sigmoid_cross_entropy(
                         logits_fake, tf.ones_like(logits_fake))
-                mse_loss = tl.cost.mean_squared_error(
-                    fake_patchs, hr_patchs, is_mean=True)
+                mse_loss = tf.keras.losses.MSE(
+                    fake_patchs, hr_patchs)
                 vgg_loss = 2e-6 * \
-                    tl.cost.mean_squared_error(
-                        feature_fake, feature_real, is_mean=True)
+                    tf.keras.losses.MSE(
+                        feature_fake, feature_real)
                 g_loss = mse_loss + vgg_loss + g_gan_loss  # generator loss
-            grad = tape.gradient(g_loss, trainable_weights)
-            g_optimizer.apply_gradients(zip(grad, trainable_weights))
+            grad = tape.gradient(g_loss, G.trainable_weights)
+            g_optimizer.apply_gradients(zip(grad, G.trainable_weights))
             grad = tape.gradient(d_loss, D.trainable_weights)
             d_optimizer.apply_gradients(zip(grad, D.trainable_weights))
             print("Epoch: [{}/{}] step: [{}/{}] time: {:.3f}s, g_loss(mse:{:.3f}, vgg:{:.3f}, adv:{:.3f}) d_loss: {:.3f}".format(
                 epoch+1, n_epoch, step+1, n_step_epoch, time.time() - step_time, mse_loss, vgg_loss, g_gan_loss, d_loss))
             g_losses_epoch.append(g_loss.numpy())
             d_losses_epoch.append(d_loss.numpy())
-            G.all_weights[:nt] = trainable_weights
         g_losses.append(g_losses_epoch)
         d_losses.append(d_losses_epoch)
         # update the learning rate
@@ -184,7 +185,7 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, 
             valid_hr_imgs = tl.vis.read_images(
                 valid_hr_img_list, path=config.VALID.hr_img_path, n_threads=32)
             valid_hr_img = valid_hr_imgs[imid]
-            w, h, c = valid_hr_img.shape
+            w, h, _ = valid_hr_img.shape
             valid_lr_img = tf.image.resize(
                 valid_hr_img, size=[w//4, h//4], method='bicubic')
         else:
@@ -202,13 +203,12 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, 
     G = get_G([1, None, None, 3])
     # 'g.h5' 'g_spec.h5 'g_srgan.npz'
     G.load_weights(os.path.join(checkpoint_dir, '{}.h5'.format(g_name)))
-    G.eval()
 
     valid_lr_img = np.asarray(valid_lr_img, dtype=np.float32)
     valid_lr_img = valid_lr_img[np.newaxis, :, :, :]
     size = [valid_lr_img.shape[1], valid_lr_img.shape[2]]
 
-    out = G(valid_lr_img).numpy()
+    out = G.evaluate(valid_lr_img).numpy()
 
     # LR size: (339, 510, 3) /  gen HR size: (1, 1356, 2040, 3)
     print("LR size: %s /  generated HR size: %s" % (size, out.shape))
