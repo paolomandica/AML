@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from Final_project.learning import train, evaluate
-from Final_project.utils import show_images, get_config
+from learning import train, evaluate
+from utils import show_images, get_config
 
 
 def reduce_gpu():

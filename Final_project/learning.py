@@ -7,7 +7,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-from Final_project.utils import *
+from utils import *
 
 
 def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, config=None):
@@ -37,9 +37,9 @@ def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, c
 
     # create folders to save result images and trained models
     save_dir = config.save_dir
-    # tl.files.exists_or_mkdir(save_dir)
+    tl.files.exists_or_mkdir(save_dir)
     checkpoint_dir = config.checkpoint_dir
-    # tl.files.exists_or_mkdir(checkpoint_dir)
+    tl.files.exists_or_mkdir(checkpoint_dir)
 
     G = get_G((batch_size, 96, 96, 3))
     D = get_D((batch_size, 384, 384, 3))
