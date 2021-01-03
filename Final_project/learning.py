@@ -7,7 +7,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-from utils import *
+from Final_project.utils import *
 
 
 def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, config=None):
