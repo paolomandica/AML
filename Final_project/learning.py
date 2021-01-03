@@ -10,36 +10,31 @@ import matplotlib.pyplot as plt
 from utils import *
 
 
-###====================== HYPER-PARAMETERS ===========================###
-# Adam
-# use 8 if your GPU memory is small, and change [4, 4] in tl.vis.save_images to [2, 4]
-config = get_config()
-batch_size = config.TRAIN.batch_size
-lr_init = config.TRAIN.lr_init
-beta1 = config.TRAIN.beta1
-# initialize G
-n_epoch_init = config.TRAIN.n_epoch_init
-# adversarial learning (SRGAN)
-n_epoch = config.TRAIN.n_epoch
-lr_decay = config.TRAIN.lr_decay
-decay_every = config.TRAIN.decay_every
-shuffle_buffer_size = 128
-n_images = 100
-# ni = int(np.sqrt(batch_size))
-
-# create folders to save result images and trained models
-save_dir = config.save_dir
-tl.files.exists_or_mkdir(save_dir)
-checkpoint_dir = config.checkpoint_dir
-tl.files.exists_or_mkdir(checkpoint_dir)
-
-
-def train(g_pretrained=False, n_trainable=None, generic=True):
+def train(g_pretrained=False, n_trainable=None, generic=True, config=None):
     total_time = time.time()
-    # with tf.device('/device:GPU:0'): # aggiunto Ale
+    if config == None:
+        config = get_config()
+
+    ### HYPER-PARAMETERS ###
+    batch_size = config.TRAIN.batch_size
+    lr_init = config.TRAIN.lr_init
+    beta1 = config.TRAIN.beta1
+    # initialize G
+    n_epoch_init = config.TRAIN.n_epoch_init
+    # adversarial learning (SRGAN)
+    n_epoch = config.TRAIN.n_epoch
+    lr_decay = config.TRAIN.lr_decay
+    decay_every = config.TRAIN.decay_every
+    n_images = config.TRAIN.n_images
+
+    # create folders to save result images and trained models
+    save_dir = config.save_dir
+    tl.files.exists_or_mkdir(save_dir)
+    checkpoint_dir = config.checkpoint_dir
+    tl.files.exists_or_mkdir(checkpoint_dir)
+
     G = get_G((batch_size, 96, 96, 3))
     D = get_D((batch_size, 384, 384, 3))
-    # era vgg19 ma non funziona più
     VGG = tl.models.vgg16(pretrained=True, end_with='pool4', mode='static')
 
     if generic:
@@ -58,14 +53,16 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
     D.train()
     VGG.train()
 
-    train_ds = get_train_data(generic)
+    train_ds = get_train_data(config, generic)
 
     trainable_weights = G.trainable_weights
 
     if g_pretrained and n_trainable:
-        G.load_weights(os.path.join(checkpoint_dir, 'g_srgan.npz'))
         nt = -n_trainable-1
         trainable_weights = G.all_weights[:nt]
+        G.load_weights(os.path.join(checkpoint_dir, 'g_srgan.npz'))
+    else:
+        nt = len(G.all_weights)
 
     g_init_losses = []
     # initialize learning (G)
@@ -157,8 +154,9 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
     G.save_weights(os.path.join(checkpoint_dir, '{}.h5'.format(g_name)))
     D.save_weights(os.path.join(checkpoint_dir, '{}.h5'.format(d_name)))
 
-    pd.DataFrame(g_init_losses).to_csv(os.path.join(
-        checkpoint_dir, g_name + '_init_loss.csv'))
+    if not g_pretrained:
+        pd.DataFrame(g_init_losses).to_csv(os.path.join(
+            checkpoint_dir, g_name + '_init_loss.csv'))
     pd.DataFrame(g_losses).to_csv(os.path.join(
         checkpoint_dir, g_name + '_losses.csv'))
     pd.DataFrame(d_losses).to_csv(os.path.join(
@@ -166,7 +164,10 @@ def train(g_pretrained=False, n_trainable=None, generic=True):
     print('TOTAL_TIME: ', round((time.time()-total_time)/60, 2), 'min')
 
 
-def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, generic=True):
+def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
+             landscapes=False, generic=True):
+
+    config = get_config()
 
     if imid == None:
         imid = 30
@@ -201,7 +202,7 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, 
 
     G = get_G([1, None, None, 3])
     # 'g.h5' 'g_spec.h5 'g_srgan.npz'
-    G.load_weights(os.path.join(checkpoint_dir, '{}.h5'.format(g_name)))
+    G.load_weights(os.path.join(config.checkpoint_dir, '{}.h5'.format(g_name)))
     G.eval()
 
     valid_lr_img = np.asarray(valid_lr_img, dtype=np.float32)
@@ -213,9 +214,10 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, 
     # LR size: (339, 510, 3) /  gen HR size: (1, 1356, 2040, 3)
     print("LR size: %s /  generated HR size: %s" % (size, out.shape))
     print("[*] save images")
-    tl.vis.save_image(out[0], os.path.join(save_dir, 'valid_gen.png'))
+    image_name = "valid_" + g_name + ".png"
+    tl.vis.save_image(out[0], os.path.join(config.save_dir, image_name))
     tl.vis.save_image(valid_lr_img[0], os.path.join(
-        save_dir, 'valid_lr.png'))
+        config.save_dir, 'valid_lr.png'))
     # if valid_hr_img is not None:
     # tl.vis.save_image(valid_hr_img, os.path.join(save_dir, 'valid_hr.png'))
 
@@ -224,13 +226,22 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None, landscapes=False, 
     # out_bicu = scipy.misc.imresize(
     #     valid_lr_img[0], [size[0] * 4, size[1] * 4], interp='bicubic', mode=None)
     # out_bicu = np.array(Image.fromarray(valid_lr_img[0]).resize([int(size[0] * 4), int(size[1] * 4)],resample=PIL.Image.BICUBIC))
-    tl.vis.save_image(out_bicu, os.path.join(save_dir, 'valid_bicubic.png'))
+    tl.vis.save_image(out_bicu, os.path.join(
+        config.save_dir, 'valid_bicubic.png'))
 
     return out, valid_hr_img
 
 
-def plot_loss():
-    g_losses = pd.read_csv(os.path.join(checkpoint_dir, 'g_spec_losses.csv'))
+def plot_loss(config, generic=True):
+    if generic:
+        g_name = 'g_losses.csv'
+        d_name = 'd_losses.csv'
+    else:
+        g_name = 'g_spec_losses.csv'
+        d_name = 'd_spec_losses.csv'
+
+    g_losses = pd.read_csv(os.path.join(
+        config.checkpoint_dir, g_name))
     l = g_losses.iloc[:, 1:].mean(axis=1)
     plt.plot(range(len(l)), l, )
     plt.xlabel('Epoch')
@@ -239,7 +250,8 @@ def plot_loss():
     plt.text(3, np.max(l)-0.001, 'last='+str(round(l.iloc[-1], 5)))
     plt.show()
 
-    d_losses = pd.read_csv(os.path.join(checkpoint_dir, 'd_spec_losses.csv'))
+    d_losses = pd.read_csv(os.path.join(
+        config.checkpoint_dir, d_name))
     l = d_losses.iloc[:, 1:].mean(axis=1)
     plt.plot(range(len(l)), l, )
     plt.xlabel('Epoch')

@@ -1,13 +1,14 @@
 import tensorflow as tf
 import tensorlayer as tl
 import multiprocessing as mp
+import matplotlib.pyplot as plt
 
 from easydict import EasyDict as edict
 from tensorlayer.layers import Input, Conv2d, BatchNorm2d, Elementwise, SubpixelConv2d, Flatten, Dense
 from tensorlayer.models import Model
+from tensorflow.keras.preprocessing import image
 
 
-n_images = 100
 shuffle_buffer_size = 128
 
 
@@ -25,6 +26,7 @@ def get_config():
     config.TRAIN.batch_size = 8
     config.TRAIN.lr_init = 1e-4
     config.TRAIN.beta1 = 0.9
+    config.TRAIN.n_images = 100
 
     # config for G initialization
     config.TRAIN.n_epoch_init = 100  # 100
@@ -38,24 +40,22 @@ def get_config():
 
     # train set location
     # config.TRAIN.hr_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/TRAIN_HR/'
-    config.TRAIN.hr_img_path = "Final_project/data/landscapes_labels/TRAIN_HR/"
-    config.TRAIN.hr_spec_img_path = "Final_project/data/landscapes_labels/3/"
-    # config.TRAIN.hr_spec_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/3/'    # mountains
-    # config.TRAIN.hr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_train_HR/'
+    config.TRAIN.hr_spec_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/3/'
+    config.TRAIN.hr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_train_HR/'
     # config.TRAIN.lr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_train_LR_bicubic/X4/'
 
     config.VALID = edict()
     # test set location
-    # config.VALID.hr_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/VALID_HR/'
-    config.VALID.hr_img_path = "Final_project/data/landscapes_labels/VALID_HR/"
+    config.VALID.hr_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/VALID_HR/'
+    # config.VALID.hr_img_path = "Final_project/data/landscapes_labels/VALID_HR/"
     # config.VALID.hr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_valid_HR/'
     # config.VALID.lr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_valid_LR_bicubic/X4/'
 
-    # config.save_dir = "/content/drive/MyDrive/AML_final_project/samples"
-    # config.checkpoint_dir = "/content/drive/MyDrive/AML_final_project/models"
+    config.save_dir = "/content/drive/MyDrive/AML_final_project/samples"
+    config.checkpoint_dir = "/content/drive/MyDrive/AML_final_project/models"
 
-    config.save_dir = "Final_project/samples"
-    config.checkpoint_dir = "Final_project/models"
+    # config.save_dir = "Final_project/samples"
+    # config.checkpoint_dir = "Final_project/models"
 
     return config
 
@@ -64,11 +64,13 @@ def get_train_data(config, generic=True):
     # load dataset
     if generic:
         path = config.TRAIN.hr_img_path
+        regx = '.*.png'
     else:
         path = config.TRAIN.hr_spec_img_path
+        regx = '.*.jpg'
 
     train_hr_img_list = sorted(tl.files.load_file_list(
-        path=path, regx='.*.jpg', printable=False))[:n_images]
+        path=path, regx=regx, printable=False))[:n_images]
 
     train_hr_imgs = tl.vis.read_images(
         train_hr_img_list, path=path, n_threads=32)
@@ -192,3 +194,11 @@ def get_D(input_shape):
     no = Dense(n_units=1, W_init=w_init)(n)
     D = Model(inputs=nin, outputs=no)  # , name="discriminator"
     return D
+
+
+def show_images(im_sr, im_hr):
+    for i, img in enumerate([im_hr, im_sr]):
+        plt.subplot(1, 2, i+1)
+        im = tf.squeeze(img)
+        im = image.array_to_img(im)
+        plt.imshow(im)
