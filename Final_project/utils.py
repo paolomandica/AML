@@ -40,7 +40,7 @@ def get_config():
 
     # train set location
     # config.TRAIN.hr_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/TRAIN_HR/'
-    config.TRAIN.hr_spec_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/3/'
+    config.TRAIN.hr_spec_img_path = '/content/drive/MyDrive/AML_final_project/landscapes/'
     config.TRAIN.hr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_train_HR/'
     # config.TRAIN.lr_img_path = '/content/drive/MyDrive/AML_final_project/DIV2K_train_LR_bicubic/X4/'
 
@@ -60,17 +60,17 @@ def get_config():
     return config
 
 
-def get_train_data(config, generic=True):
+def get_train_data(config, generic=True, land_class=None):
     # load dataset
     if generic:
         path = config.TRAIN.hr_img_path
         regx = '.*.png'
     else:
-        path = config.TRAIN.hr_spec_img_path
+        path = config.TRAIN.hr_spec_img_path + str(land_class) + "/"
         regx = '.*.jpg'
 
     train_hr_img_list = sorted(tl.files.load_file_list(
-        path=path, regx=regx, printable=False))[:n_images]
+        path=path, regx=regx, printable=False))[:config.TRAIN.n_images]
 
     train_hr_imgs = tl.vis.read_images(
         train_hr_img_list, path=path, n_threads=32)
@@ -197,8 +197,17 @@ def get_D(input_shape):
 
 
 def show_images(im_sr, im_hr):
-    for i, img in enumerate([im_hr, im_sr]):
-        plt.subplot(1, 2, i+1)
+    for img in [im_hr, im_sr]:
+        plt.figure(figsize=(20, 10))
         im = tf.squeeze(img)
         im = image.array_to_img(im)
         plt.imshow(im)
+        plt.show()
+
+
+def cropping(img):
+    hr_patch = tf.image.random_crop(img, [384, 384, 3])
+    hr_patch = (tf.cast(hr_patch, tf.float32) / 127.5) - \
+        1.  # or method='bilinear')
+    lr_patch = tf.image.resize(hr_patch, size=[96, 96], method='bicubic')
+    return lr_patch, hr_patch

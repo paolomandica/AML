@@ -10,7 +10,15 @@ import matplotlib.pyplot as plt
 from utils import *
 
 
-def train(g_pretrained=False, n_trainable=None, generic=True, config=None):
+def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, config=None):
+
+    if generic == False and land_class == None:
+        raise ValueError(
+            "If you are training a Specialized-SRGAN, you have to select a landscape class among [2,...,7].")
+
+    if generic and land_class is not None:
+        print("WARNING: if you set generic=True, the land_class variable will not be used.")
+
     total_time = time.time()
     if config == None:
         config = get_config()
@@ -41,8 +49,8 @@ def train(g_pretrained=False, n_trainable=None, generic=True, config=None):
         g_name = 'g'
         d_name = 'd'
     else:
-        g_name = 'g_spec'
-        d_name = 'd_spec'
+        g_name = 'g_spec_' + str(land_class)
+        d_name = 'd_spec_' + str(land_class)
 
     lr_v = tf.Variable(lr_init)
     g_optimizer_init = tf.optimizers.Adam(lr_v, beta_1=beta1)
@@ -53,7 +61,7 @@ def train(g_pretrained=False, n_trainable=None, generic=True, config=None):
     D.train()
     VGG.train()
 
-    train_ds = get_train_data(config, generic)
+    train_ds = get_train_data(config, generic, land_class)
 
     trainable_weights = G.trainable_weights
 
@@ -165,7 +173,14 @@ def train(g_pretrained=False, n_trainable=None, generic=True, config=None):
 
 
 def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
-             landscapes=False, generic=True):
+             landscapes=False, generic=True, land_class=None):
+
+    if generic == False and land_class == None:
+        raise ValueError(
+            "If you are evaluating a Specialized-SRGAN, you have to select a landscape class among [2,...,7].")
+
+    if generic and land_class is not None:
+        print("WARNING: if you set generic=True, the land_class variable will not be used.")
 
     config = get_config()
 
@@ -175,7 +190,7 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     if generic:
         g_name = 'g'
     else:
-        g_name = 'g_spec'
+        g_name = 'g_spec_' + str(land_class)
 
     if valid_lr_img is None:
         ###====================== PRE-LOAD DATA ===========================###
@@ -208,7 +223,11 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     valid_lr_img = np.asarray(valid_lr_img, dtype=np.float32)
     valid_lr_img = valid_lr_img[np.newaxis, :, :, :]
     size = [valid_lr_img.shape[1], valid_lr_img.shape[2]]
-
+    valid_lr_crop, valid_hr_crop = cropping(valid_hr_img)
+    fake_patchs = G(tf.expand_dims(valid_lr_crop, 0))
+    mse_loss = tl.cost.mean_squared_error(
+        tf.squeeze(fake_patchs), valid_hr_crop, is_mean=True)
+    ssim_loss = tf.image.ssim(tf.squeeze(fake_patchs), valid_hr_crop, 126.5)
     out = G(valid_lr_img).numpy()
 
     # LR size: (339, 510, 3) /  gen HR size: (1, 1356, 2040, 3)
@@ -229,16 +248,16 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     tl.vis.save_image(out_bicu, os.path.join(
         config.save_dir, 'valid_bicubic.png'))
 
-    return out, valid_hr_img
+    return out, valid_hr_img, mse_loss, (1-ssim_loss)
 
 
-def plot_loss(config, generic=True):
+def plot_loss(config, generic=True, land_class=None):
     if generic:
         g_name = 'g_losses.csv'
         d_name = 'd_losses.csv'
     else:
-        g_name = 'g_spec_losses.csv'
-        d_name = 'd_spec_losses.csv'
+        g_name = 'g_spec_{}_losses.csv'.format(str(land_class))
+        d_name = 'd_spec_{}_losses.csv'.format(str(land_class))
 
     g_losses = pd.read_csv(os.path.join(
         config.checkpoint_dir, g_name))
