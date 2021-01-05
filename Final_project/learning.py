@@ -173,7 +173,8 @@ def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, c
 
 
 def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
-             landscapes=False, generic=True, land_class=None):
+             landscapes=False, generic=True, land_class=None,
+             config=None):
 
     if generic == False and land_class == None:
         raise ValueError(
@@ -182,7 +183,8 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     if generic and land_class is not None:
         print("WARNING: if you set generic=True, the land_class variable will not be used.")
 
-    config = get_config()
+    if config == None:
+        config = get_config()
 
     if imid == None:
         imid = 30
@@ -278,3 +280,45 @@ def plot_loss(config, generic=True, land_class=None):
     plt.title('Discriminator (GAN)')
     plt.text(3, np.max(l)-0.01, 'last='+str(round(l.iloc[-1], 5)))
     plt.show()
+
+
+def compute_matrices(config=None):
+    all_pre = [2, 3, 4, 5, 6, None]
+    mse_matrix = []
+    ssim_matrix = []
+
+    n_imm = 20
+
+    if config == None:
+        config = get_config()
+
+    for mod in all_pre:
+        mse_class = []
+        ssim_class = []
+        for cls in all_pre:
+            if cls == None:
+                config.VALID.hr_img_path = config.TRAIN.hr_spec_img_path + \
+                    "/" + str(1) + '/'
+            else:
+                config.VALID.hr_img_path = config.TRAIN.hr_spec_img_path + \
+                    "/" + str(cls) + '/'
+            mse_array = []
+            ssim_array = []
+            for img in range(n_imm):
+                print('################ model: ', mod, ' ### cls: ',
+                      cls, ' ### img: ', img, ' ############')
+                if mod == None:
+                    im_sr, im_hr, mse, ssim = evaluate(-img,
+                                                       landscapes=True, generic=True, land_class=mod)
+                else:
+                    im_sr, im_hr, mse, ssim = evaluate(-img,
+                                                       landscapes=True, generic=False, land_class=mod)
+                mse_array.append(mse.numpy())
+                ssim_array.append(ssim.numpy())
+            mse_class.append(np.mean(mse_array))
+            ssim_class.append(np.mean(ssim_array))
+        mse_matrix.append(mse_class)
+        ssim_matrix.append(ssim_class)
+
+    pd.DataFrame(mse_matrix).to_csv(config.mse_matrix_path)
+    pd.DataFrame(ssim_matrix).to_csv(config.ssim_matrix_path)

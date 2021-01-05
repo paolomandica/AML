@@ -53,6 +53,8 @@ def get_config():
 
     config.save_dir = "/content/drive/MyDrive/AML_final_project/samples"
     config.checkpoint_dir = "/content/drive/MyDrive/AML_final_project/models"
+    config.mse_matrix_path = "/content/drive/MyDrive/AML_final_project/Final_matrices/mse_matrix.csv"
+    config.ssim_matrix_path = "/content/drive/MyDrive/AML_final_project/Final_matrices/ssim_matrix.csv"
 
     # config.save_dir = "Final_project/samples"
     # config.checkpoint_dir = "Final_project/models"
