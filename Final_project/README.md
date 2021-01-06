@@ -9,6 +9,8 @@ This is the repository for the final project of the Advanded Machine Learning co
 
 The project is described in detail in the report.
 
+The notebook of the project can be found [here](https://colab.research.google.com/drive/1zu3-bMXEdxpidi2KKgA8f87QoRD9tUmB?usp=sharing) (Google Colab).
+
 ## Objective
 
 The project is focused on the development of a Specialized Super-Resolution Generative Adversarial Network.
