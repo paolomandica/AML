@@ -20,6 +20,9 @@ def check_gpu():
 
 
 def get_config():
+    """Get a configuration dict containing hyperparameters and
+    paths needed for the training and evaluation of a model.
+    """
     config = edict()
     config.TRAIN = edict()
 
@@ -63,6 +66,26 @@ def get_config():
 
 
 def get_train_data(config, generic=True, land_class=None):
+    """Returns a tf.Dataset with images coming from the
+    selected folder.
+
+    Set generic to True if you want the div2k dataset,
+    otherwise set it to False and assign to land_class an
+    integer between 2 and 6 to return the related landscape
+    dataset.
+
+    Args:
+        config : edict
+            Configuration dict of the project.
+        generic : boolean
+            Return div2k dataset.
+        land_class : int or None. 
+            Integer in [2-6]. With generic=False, returns the landscape
+            dataset of that class.
+
+    Returns:
+        A tf.Dataset of images with batch_size and n_images taken from config.
+    """
     # load dataset
     if generic:
         path = config.TRAIN.hr_img_path
@@ -107,6 +130,12 @@ def get_train_data(config, generic=True, land_class=None):
 
 
 def get_G(input_shape):
+    """Get a Generator model with randomly inizialized weights.
+
+    Args:
+        input_shape : tuple
+            Input shape of the Input layer of the model.
+    """
     w_init = tf.random_normal_initializer(stddev=0.02)
     g_init = tf.random_normal_initializer(1., 0.02)
 
@@ -150,6 +179,12 @@ def get_G(input_shape):
 
 
 def get_D(input_shape):
+    """Get a Discriminator model with randomly inizialized weights.
+
+    Args:
+        input_shape : tuple
+            Input shape of the Input layer of the model.
+    """
     w_init = tf.random_normal_initializer(stddev=0.02)
     gamma_init = tf.random_normal_initializer(1., 0.02)
     df_dim = 64

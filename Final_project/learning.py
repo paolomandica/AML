@@ -10,7 +10,29 @@ import matplotlib.pyplot as plt
 from utils import *
 
 
-def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, config=None):
+def train(g_pretrained=False, n_trainable=None,
+          generic=True, land_class=None, config=None):
+    """Train a SRGAN. Choose between training from zero or using a pretrained
+    model. You can also choose between training a generic SRGAN or a specialized
+    one.
+
+    The model (h5 file) will be saved in the folder indicated in the config edict.
+
+    Args:
+        g_pretrained : boolean
+            True to use a pretrained mode, False to train from random weights.
+        n_trainable : integer
+            Number of layer to use for transfer learning. Only if g_pretrained
+            is True.
+        generic : boolean
+            Whether to train a generic model or a specialized one.
+        land_class : int or None
+            If generic=False, which landscapes class to train the specialized
+            model on.
+        config : edict of None
+            None to use a standard config dict. Input a new config dict to use
+            a personalized one.
+    """
 
     if generic == False and land_class == None:
         raise ValueError(
@@ -156,7 +178,7 @@ def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, c
                 checkpoint_dir, '{}.h5'.format(g_name)))
             D.save_weights(os.path.join(
                 checkpoint_dir, '{}.h5'.format(d_name)))
-    # aggiunto Ale
+
     tl.vis.save_images(fake_patchs.numpy(), [2, 4], os.path.join(
         save_dir, 'train_{}_final.png'.format(g_name)))
     G.save_weights(os.path.join(checkpoint_dir, '{}.h5'.format(g_name)))
@@ -172,9 +194,28 @@ def train(g_pretrained=False, n_trainable=None, generic=True, land_class=None, c
     print('TOTAL_TIME: ', round((time.time()-total_time)/60, 2), 'min')
 
 
-def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
-             landscapes=False, generic=True, land_class=None,
-             config=None):
+def evaluate(imid=None, landscapes=False, generic=True,
+             land_class=None, config=None):
+    """Evaluate a SRGAN. Choose between evaluating a generic SRGAN or a specialized
+    one and on which class and image to do the evaluation.
+
+    Use the funtion utils.show_images to display the high-resolution and the
+    super-resolution images returned.
+
+    Args:
+        imid : int or None
+            Id of the image to generate in super-resolution.
+        generic : boolean
+            Whether to evaluate a generic model or a specialized one.
+        land_class : int or None
+            If generic=False, which specialized model to use.
+        config : edict or None
+            None to use a standard config dict. Input a new config dict to use
+            a personalized one.
+
+    Returns:
+        Generated image, high-res image, mse loss, 1-ssim loss.
+    """
 
     if generic == False and land_class == None:
         raise ValueError(
@@ -194,24 +235,23 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     else:
         g_name = 'g_spec_' + str(land_class)
 
-    if valid_lr_img is None:
-        ###====================== PRE-LOAD DATA ===========================###
-        if landscapes:
-            valid_hr_img_list = sorted(tl.files.load_file_list(
-                path=config.VALID.hr_img_path, regx='.*.jpg', printable=False))
-            valid_hr_imgs = tl.vis.read_images(
-                valid_hr_img_list, path=config.VALID.hr_img_path, n_threads=32)
-            valid_hr_img = valid_hr_imgs[imid]
-            w, h, c = valid_hr_img.shape
-            valid_lr_img = tf.image.resize(
-                valid_hr_img, size=[w//4, h//4], method='bicubic')
-        else:
-            valid_lr_img_list = sorted(tl.files.load_file_list(
-                path=config.VALID.lr_img_path, regx='.*.png', printable=False))
-            valid_lr_imgs = tl.vis.read_images(
-                valid_lr_img_list, path=config.VALID.lr_img_path, n_threads=32)
-            valid_lr_img = valid_lr_imgs[imid]
-            valid_hr_img = None
+    ###====================== PRE-LOAD DATA ===========================###
+    if landscapes:
+        valid_hr_img_list = sorted(tl.files.load_file_list(
+            path=config.VALID.hr_img_path, regx='.*.jpg', printable=False))
+        valid_hr_imgs = tl.vis.read_images(
+            valid_hr_img_list, path=config.VALID.hr_img_path, n_threads=32)
+        valid_hr_img = valid_hr_imgs[imid]
+        w, h, c = valid_hr_img.shape
+        valid_lr_img = tf.image.resize(
+            valid_hr_img, size=[w//4, h//4], method='bicubic')
+    else:
+        valid_lr_img_list = sorted(tl.files.load_file_list(
+            path=config.VALID.lr_img_path, regx='.*.png', printable=False))
+        valid_lr_imgs = tl.vis.read_images(
+            valid_lr_img_list, path=config.VALID.lr_img_path, n_threads=32)
+        valid_lr_img = valid_lr_imgs[imid]
+        valid_hr_img = None
 
         ###========================== DEFINE MODEL ============================###
 
@@ -253,7 +293,22 @@ def evaluate(imid=None, valid_lr_img=None, valid_hr_img=None,
     return out, valid_hr_img, mse_loss, (1-ssim_loss)
 
 
-def plot_loss(config, generic=True, land_class=None):
+def plot_loss(config=None, generic=True, land_class=None):
+    """Plot the training loss history of Generator and Discriminator.
+
+    Args:
+        config : edict or None
+            None to use a standard config dict. Input a new config dict to use
+            a personalized one.
+        generic : bool
+            Whether to plot loss history of a generic model or not.
+        land_class: int or None
+            If generic=False, plot the loss history of the selected specialized model.
+    """
+
+    if config == None:
+        config = get_config()
+
     if generic:
         g_name = 'g_losses.csv'
         d_name = 'd_losses.csv'
@@ -283,6 +338,8 @@ def plot_loss(config, generic=True, land_class=None):
 
 
 def compute_matrices(config=None):
+    """Compute and save the matrices of mse and ssim losses.
+    """
     all_pre = [2, 3, 4, 5, 6, None]
     mse_matrix = []
     ssim_matrix = []
