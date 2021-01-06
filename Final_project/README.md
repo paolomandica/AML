@@ -1,17 +1,24 @@
 # AML Final Project - Specialized SR-GAN
 
-This the repository for the final project of the Advanded Machine Learning course for the Master's Degree in Data Science @ Sapienza University of Rome.
+Alessio Sampieri  
+Lorenzo Ceccomancini  
+Michele Meo  
+Paolo Mandica
+
+This is the repository for the final project of the Advanded Machine Learning course for the Master's Degree in Data Science @ Sapienza University of Rome.
 
 The project is described in detail in the report.
 
 ## Objective
 
-The project is focused on the development of a Super-Resolution Generative Adversarial Network (SR-GAN).
+The project is focused on the development of a Specialized Super-Resolution Generative Adversarial Network.
 
-The super-resolution image restoration problem is central in the computer vision field and it can have a lot of applications or utilities. Convolutional neural networks are widely used in this computer vision area and, recently, has also been proposed SR-GAN, a Generative Adversarial Network for image Super Resolution \cite{1}, that is able to obtain the super resolution version of a photo-realistic image downscaled by 4x factor.  
-In this work we tried to understand this architecture and use it to reconstruct the high-definition version of a specific class of images, in our case landscape images: in particular, through the transfer learning technique, we tried to specialize the pre-trained model, proposed in this [paper by Ledig et al.](https://arxiv.org/pdf/1609.04802.pdf) and [github repository](https://github.com/tensorlayer/srgan), in generation of the high-resolution photos of a specific landscape class.
+The super-resolution image restoration problem is central in the computer vision field and it can have a lot of applications or utilities. Convolutional neural networks are widely used in this computer vision area and, recently, the SR-GAN architecture has been proposed, in the Generative Adversarial Network for image Super Resolution [paper by Ledig et al.](https://arxiv.org/pdf/1609.04802.pdf), that is able to obtain the super resolution version of a photo-realistic image downscaled by 4x factor.  
+In this work we tried to understand this architecture and use it to reconstruct the high-definition version of a specific class of images, in our case landscape images: in particular, through the transfer learning technique, we tried to specialize the pre-trained model, proposed in this [github repository](https://github.com/tensorlayer/srgan) from the official paper, in order to be able to generate high-resolution photos of a specific landscape class.
 
 Our specialized-SR-GAN is able to obtain better results, so lower loss discrepancies from the original high resolution set of images, on almost all the landscape classes we have worked on and we will show this in a matrix specialized models-classes comparison.
+
+![](https://paperswithcode.com/media/methods/Screen_Shot_2020-07-19_at_11.13.45_AM_zsF2pa7.png)
 
 
 ## Datasets
