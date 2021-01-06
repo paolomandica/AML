@@ -4,7 +4,6 @@ import time
 import os
 import pandas as pd
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 
 from utils import *
@@ -284,9 +283,6 @@ def evaluate(imid=None, landscapes=False, generic=True,
 
     out_bicu = tf.image.resize(valid_lr_img[0], size=[
                                size[0] * 4, size[1] * 4], method='bicubic')
-    # out_bicu = scipy.misc.imresize(
-    #     valid_lr_img[0], [size[0] * 4, size[1] * 4], interp='bicubic', mode=None)
-    # out_bicu = np.array(Image.fromarray(valid_lr_img[0]).resize([int(size[0] * 4), int(size[1] * 4)],resample=PIL.Image.BICUBIC))
     tl.vis.save_image(out_bicu, os.path.join(
         config.save_dir, 'valid_bicubic.png'))
 
