@@ -234,8 +234,11 @@ def get_D(input_shape):
 
 
 def show_images(im_sr, im_hr):
-    for img in [im_hr, im_sr]:
+    titles = ["Original High-res image",
+              "Generated SR image"]
+    for i, img in enumerate([im_hr, im_sr]):
         plt.figure(figsize=(20, 10))
+        plt.title(titles[i])
         im = tf.squeeze(img)
         im = image.array_to_img(im)
         plt.imshow(im)
