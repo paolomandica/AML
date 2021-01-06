@@ -72,7 +72,7 @@ def extract_sample():
 
 
 if __name__ == "__main__":
-
+    # Separate the landscapes dataset into classes
     extract_all_labels()
 
     print("Extracting sample...")
